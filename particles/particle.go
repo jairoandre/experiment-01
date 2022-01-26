@@ -1,4 +1,4 @@
-package main
+package particles
 
 import (
 	vec "github.com/jairoandre/vector-go"
@@ -25,10 +25,10 @@ func NewParticle(x, y, dim int) Particle {
 	a := uint8(50 + (125 * rand.Float64()))
 	col := Gradient.At(rand.Float64())
 	alpha := image.NewUniform(color.Alpha{A: a})
+	//alpha := image.NewUniform(color.Alpha{A: 0xff})
 	return Particle{
-		Dim: dim,
-		//Weight: float64(dim),
-		Weight: 1.0 + rand.Float64()*4,
+		Dim:    dim,
+		Weight: 1.0 + rand.Float64()*float64(dim),
 		Pos:    vec.NewVec2dFromInt(x, y),
 		Alpha:  alpha,
 		Color:  col,
@@ -56,5 +56,5 @@ func (p *Particle) Draw(canvas *image.RGBA) {
 	y := int(p.Pos.Y)
 	offset := p.Dim
 	rect := image.Rect(x-offset, y-offset, x+p.Dim, y+p.Dim)
-	draw.DrawMask(canvas, rect, uni, zeroPoint, p.Alpha, zeroPoint, draw.Over)
+	draw.DrawMask(canvas, rect, uni, zeroPoint, nil, zeroPoint, draw.Over)
 }
