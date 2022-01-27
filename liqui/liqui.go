@@ -3,6 +3,7 @@ package liqui
 import (
 	"experiment-01/utils"
 	"github.com/hajimehoshi/ebiten/v2"
+	vec "github.com/jairoandre/vector-go"
 	"github.com/mazznoer/colorgrad"
 	"image"
 	"sync"
@@ -16,6 +17,9 @@ const (
 type CellData struct {
 	image.RGBA
 	Level [][]float64
+	Pos   [][]*vec.Vector2d
+	Vel   [][]*vec.Vector2d
+	Mass  [][]float64
 }
 
 func (c *CellData) SetLevel(x, y int, level float64) {
@@ -92,7 +96,7 @@ func (g *Game) Update() error {
 		go func() {
 			defer wg.Done()
 			for x := 0; x < Width; x++ {
-				newLevel := g.Canvas.LevelAt(x, y) - 0.1
+				newLevel := g.Canvas.LevelAt(x, y) - 0.001
 				if newLevel < 0 {
 					newLevel = 1.0
 				}
