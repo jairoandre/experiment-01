@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	Width  = 640
-	Height = 480
+	Width  = 320
+	Height = 240
 )
 
 type CellData struct {
@@ -19,7 +19,6 @@ type CellData struct {
 	Level [][]float64
 	Pos   [][]*vec.Vector2d
 	Vel   [][]*vec.Vector2d
-	Mass  [][]float64
 }
 
 func (c *CellData) SetLevel(x, y int, level float64) {
@@ -33,13 +32,21 @@ func (c *CellData) LevelAt(x, y int) float64 {
 func NewCellData(rect image.Rectangle) *CellData {
 	pt := rect.Max
 	level := make([][]float64, 0)
+	pos := make([][]*vec.Vector2d, 0)
 	for y := 0; y < pt.Y; y++ {
-		row := make([]float64, pt.X)
-		level = append(level, row)
+		levelRow := make([]float64, pt.X)
+		level = append(level, levelRow)
+		posRow := make([]*vec.Vector2d, 0)
+		for x := 0; x < pt.X; x++ {
+			thisPos := vec.NewVec2dFromInt(x, y)
+			posRow = append(posRow, &thisPos)
+		}
+		pos = append(pos, posRow)
 	}
 	return &CellData{
 		RGBA:  *image.NewRGBA(rect),
 		Level: level,
+		Pos:   pos,
 	}
 }
 
@@ -50,17 +57,20 @@ type Game struct {
 }
 
 var gradient = colorgrad.Inferno()
+var center = vec.NewVec2dFromInt(Width/2, Height/2)
 
 func NewGame() *Game {
 	rect := image.Rect(0, 0, Width, Height)
 	canvas := NewCellData(rect)
-	//for y := 0; y < Height; y++ {
-	//	for x := 0; x < Width; x++ {
-	//		level := rand.Float64()
-	//		canvas.Set(x, y, gradient.At(level))
-	//		canvas.SetLevel(x, y, level)
-	//	}
-	//}
+	centerLen := center.Len()
+	for y := 0; y < Height; y++ {
+		for x := 0; x < Width; x++ {
+			t := center.Sub(*canvas.Pos[y][x]).Len()
+			level := t / centerLen
+			canvas.Set(x, y, gradient.At(level))
+			canvas.SetLevel(x, y, level)
+		}
+	}
 	return &Game{
 		Width:  Width,
 		Height: Height,
