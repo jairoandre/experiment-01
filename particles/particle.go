@@ -28,7 +28,7 @@ func NewParticle(x, y, dim int) Particle {
 	//alpha := image.NewUniform(color.Alpha{A: 0xff})
 	return Particle{
 		Dim:    dim,
-		Weight: 1.0 + rand.Float64()*float64(dim),
+		Weight: 2.0 + rand.Float64()*float64(dim),
 		Pos:    vec.NewVec2dFromInt(x, y),
 		Alpha:  alpha,
 		Color:  col,

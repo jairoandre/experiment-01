@@ -26,13 +26,13 @@ type Game struct {
 
 func (g *Game) FadeEffect() {
 	uni := image.NewUniform(color.Black)
-	alpha := image.NewUniform(color.Alpha{A: 0x03})
+	alpha := image.NewUniform(color.Alpha{A: 0x88})
 	draw.DrawMask(g.Canvas, g.Canvas.Bounds(), uni, image.Point{}, alpha, image.Point{}, draw.Over)
 }
 
-func updateParticles(canvas *image.RGBA, mouseVec2d vec.Vector2d, particles []*Particle) {
+func updateParticles(canvas *image.RGBA, mouseVec2d vec.Vector2d, particles []*Particle, scalar float64) {
 	for _, particle := range particles {
-		force := mouseVec2d.Sub(particle.Pos).Normalize().Mul(0.01)
+		force := mouseVec2d.Sub(particle.Pos).Normalize().Mul(scalar)
 		particle.ApplyForce(force)
 		particle.Update()
 		particle.Draw(canvas)
@@ -47,8 +47,8 @@ func (g *Game) Update() error {
 		return nil
 	}
 	start := time.Now()
-	g.FadeEffect()
-	//g.Canvas = image.NewRGBA(image.Rect(0, 0, Width, Height))
+	//g.FadeEffect()
+	g.Canvas = image.NewRGBA(image.Rect(0, 0, Width, Height))
 	mx, my := ebiten.CursorPosition()
 	mouseVec2d := vec.NewVec2dFromInt(mx, my)
 	wg := sync.WaitGroup{}
@@ -57,7 +57,7 @@ func (g *Game) Update() error {
 		i := i
 		go func() {
 			defer wg.Done()
-			updateParticles(g.Canvas, mouseVec2d, g.Particles[i:i+sliceRoutineSize])
+			updateParticles(g.Canvas, mouseVec2d, g.Particles[i:i+sliceRoutineSize], 0.001+(float64(g.Tick)*0.0001))
 		}()
 	}
 	wg.Wait()
@@ -67,6 +67,9 @@ func (g *Game) Update() error {
 		g.LastUpdateTime = delta.Milliseconds()
 	}
 	g.Tick += 1
+	if g.Tick >= 500 {
+		g.Tick = 0
+	}
 	return nil
 }
 
@@ -90,9 +93,9 @@ func (g *Game) Layout(w, h int) (int, int) {
 }
 
 const (
-	Width            = 1280 / 2
-	Height           = 720 / 2
-	NumParticles     = 5000
+	Width            = 1280
+	Height           = 720
+	NumParticles     = 500000
 	sliceRoutineSize = 1000
 )
 
