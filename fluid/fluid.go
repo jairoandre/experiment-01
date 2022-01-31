@@ -256,8 +256,12 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
-	g.Fluid.AddDensity(N/2, N/2, 1)
-	g.Fluid.AddVelocity(N/2, N/2, 0, 1)
+	for i := -2; i <= 2; i++ {
+		for j := -2; j <= 2; j++ {
+			g.Fluid.AddDensity(N/2+i, N/2+j, 0.1)
+			g.Fluid.AddVelocity(N/2+i, N/2+j, float64(i), float64(j))
+		}
+	}
 	g.Fluid.Step()
 	return nil
 }
