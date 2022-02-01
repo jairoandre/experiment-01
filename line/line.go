@@ -7,11 +7,13 @@ import (
 	"image"
 	"image/color"
 	"math/rand"
+	"sync"
 )
 
 const (
-	Width  = 640
-	Height = 480
+	Width       = 640
+	Height      = 480
+	RoutineStep = 1000
 )
 
 type Game struct {
@@ -22,7 +24,7 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	var particles [200]*vec.Vector2d
+	var particles [50000]*vec.Vector2d
 	for idx, _ := range particles {
 		x := rand.Float64() * Width
 		y := rand.Float64() * Height
@@ -39,12 +41,26 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
-	for _, p := range g.Particles {
-		x, y := p.IntCoords()
-		g.Canvas.Set(x, y, color.White)
-		p.X += rand.Float64() - 0.5
-		p.Y += rand.Float64() - 0.5
+	g.Canvas = image.NewRGBA(g.Canvas.Bounds())
+	//ctx := gg.NewContextForRGBA(g.Canvas)
+	wg := sync.WaitGroup{}
+	for i := 0; i < len(g.Particles); i += RoutineStep {
+		i := i
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for _, p := range g.Particles[i : i+RoutineStep] {
+				//ctx.DrawCircle(p.X, p.Y, 4)
+				//ctx.SetRGBA(1, 1, 1, 0.5)
+				//ctx.Fill()
+				x, y := p.IntCoords()
+				g.Canvas.Set(x, y, color.White)
+				p.X += rand.Float64() - 0.5
+				p.Y += rand.Float64() - 0.5
+			}
+		}()
 	}
+	wg.Wait()
 	return nil
 }
 
