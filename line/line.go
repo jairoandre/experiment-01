@@ -6,6 +6,7 @@ import (
 	vec "github.com/jairoandre/vector-go"
 	"image"
 	"image/color"
+	"math"
 	"math/rand"
 	"sync"
 )
@@ -21,6 +22,7 @@ type Game struct {
 	Height    int
 	Canvas    *image.RGBA
 	Particles []*vec.Vector2d
+	Tick      float64
 }
 
 func NewGame() *Game {
@@ -40,7 +42,14 @@ func NewGame() *Game {
 	return game
 }
 
+func Hash11(f float64) float64 {
+	a := math.Sin(f*3325) * 33253
+	b := math.Floor(a)
+	return (a - b) - 0.5
+}
+
 func (g *Game) Update() error {
+	g.Tick += 0.01
 	g.Canvas = image.NewRGBA(g.Canvas.Bounds())
 	//ctx := gg.NewContextForRGBA(g.Canvas)
 	wg := sync.WaitGroup{}
@@ -49,14 +58,15 @@ func (g *Game) Update() error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for _, p := range g.Particles[i : i+RoutineStep] {
+			for idx, p := range g.Particles[i : i+RoutineStep] {
+				iF := float64(idx)
 				//ctx.DrawCircle(p.X, p.Y, 4)
 				//ctx.SetRGBA(1, 1, 1, 0.5)
 				//ctx.Fill()
 				x, y := p.IntCoords()
 				g.Canvas.Set(x, y, color.White)
-				p.X += rand.Float64() - 0.5
-				p.Y += rand.Float64() - 0.5
+				p.X += Hash11(iF * g.Tick * 0.02)
+				p.Y += Hash11(iF * g.Tick * 0.32)
 			}
 		}()
 	}

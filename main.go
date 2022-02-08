@@ -1,13 +1,13 @@
 package main
 
 import (
-	"experiment-01/line"
+	"experiment-01/overlap"
 	"github.com/hajimehoshi/ebiten/v2"
 	"log"
 )
 
 func main() {
-	g := line.NewGame()
+	g := overlap.NewGame()
 	ebiten.SetWindowSize(g.Width, g.Height)
 	ebiten.SetWindowTitle("Experiment")
 	if err := ebiten.RunGame(g); err != nil {
